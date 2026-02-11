@@ -2,8 +2,6 @@ const { Op } = require("sequelize");
 const sequelize = require("../../../config/database");
 const Meeting = require("../model/meeting.model");
 const User = require("../../user/model/user.model");
-
-/* ================= CREATE MEETING ================= */
 async function createMeeting(data) {
   if (!data.title || !data.startTime || !data.endTime || !data.userId) {
     throw new Error("Missing required meeting fields");
@@ -19,7 +17,7 @@ async function createMeeting(data) {
 
   const conflict = await Meeting.findOne({
     where: {
-      userId: data.userId,  // ✅ FIXED
+      userId: data.userId, 
       startTime: { [Op.lt]: data.endTime },
       endTime: { [Op.gt]: data.startTime }
     }
@@ -33,25 +31,24 @@ async function createMeeting(data) {
         title: data.title,
         startTime: data.startTime,
         endTime: data.endTime,
-        userId: data.userId   // ✅ FIXED
+        userId: data.userId 
       },
       { transaction: t }
     );
   });
 }
-/* ================= GET ALL ================= */
+
 async function getAllMeetings() {
   return await Meeting.findAll();
 }
 
-/* ================= GET ONE ================= */
+
 async function getMeetingById(id) {
   const meeting = await Meeting.findByPk(id);
   if (!meeting) throw new Error("Meeting not found");
   return meeting;
 }
 
-/* ================= GET WITH USERS (JOIN) ================= */
 async function getMeetingsWithUsers() {
   return await Meeting.findAll({
     include: {
@@ -61,7 +58,6 @@ async function getMeetingsWithUsers() {
   });
 }
 
-/* ================= UPDATE MEETING ================= */
 async function updateMeeting(id, data) {
   const meeting = await Meeting.findByPk(id);
   if (!meeting) throw new Error("Meeting not found");
@@ -78,7 +74,7 @@ async function updateMeeting(id, data) {
     throw new Error("Invalid meeting time range");
   }
 
-  // 🚫 CONFLICT CHECK (exclude itself)
+
   const conflict = await Meeting.findOne({
     where: {
       UserId: meeting.UserId,
